@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gambling</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Nickname Input Page -->
+    <div class="nickname-container" id="nicknameContainer">
+        <h1>Welcome to Gambling</h1>
+        <p>Enter your nickname to start:</p>
+        <input type="text" id="nicknameInput" placeholder="Your nickname" maxlength="20">
+        <button id="startButton">Start Game</button>
+    </div>
+
+    <!-- Game Page -->
+    <div class="game-container hidden" id="gameContainer">
+        <h1>Gambling</h1>
+        <p id="greeting"></p>
+        <p>Points: <span id="points">100</span></p>
+        <div class="grid-container" id="gameBoard"></div>
+    </div>
+
+    <!-- Overlay and Pop-Up -->
+    <div class="overlay hidden" id="overlay"></div>
+    <div class="popup hidden" id="popup">
+        <h2 id="popupTitle"></h2>
+        <p id="popupMessage"></p>
+        <button id="playAgainButton">Play Again</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>Create by Zakikey</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
