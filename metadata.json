@@ -1,0 +1,6 @@
+{
+  "name": "Gambling - Diamond Mines",
+  "description": "Game tebak Diamond dan Bomb oleh Zakikey dari repository GitHub Zakikeyy/gambling",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

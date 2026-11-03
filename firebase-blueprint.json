@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "LeaderboardEntry": {
+      "title": "Leaderboard Entry",
+      "description": "Public leaderboard entry representing a player's balance and game winnings",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Unique user ID of the player",
+          "maxLength": 128
+        },
+        "nickname": {
+          "type": "string",
+          "description": "Player display nickname",
+          "maxLength": 30
+        },
+        "balance": {
+          "type": "number",
+          "description": "Current player coin balance"
+        },
+        "totalWins": {
+          "type": "number",
+          "description": "Accumulated total wins across all games"
+        },
+        "totalLosses": {
+          "type": "number",
+          "description": "Accumulated total losses absorbed by casino house"
+        },
+        "gameWins": {
+          "type": "object",
+          "description": "Coins won per individual game category"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the record was last synced"
+        }
+      },
+      "required": ["userId", "nickname", "balance"]
+    }
+  },
+  "firestore": {
+    "/leaderboard/{userId}": {
+      "schema": "LeaderboardEntry",
+      "description": "Synced global leaderboard records across all players"
+    }
+  }
+}

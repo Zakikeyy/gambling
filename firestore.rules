@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidLeaderboard(data) {
+      return data.userId is string &&
+             data.userId.size() <= 128 &&
+             data.nickname is string &&
+             data.nickname.size() <= 30 &&
+             data.balance is number &&
+             data.balance >= 0;
+    }
+
+    match /leaderboard/{userId} {
+      // Global leaderboard is publicly viewable by all players
+      allow read: if true;
+
+      // Players can only write to their own leaderboard record
+      allow create: if isSignedIn() &&
+                      isValidId(userId) &&
+                      request.auth.uid == userId &&
+                      incoming().userId == userId &&
+                      isValidLeaderboard(incoming());
+
+      allow update: if isSignedIn() &&
+                      isValidId(userId) &&
+                      request.auth.uid == userId &&
+                      incoming().userId == userId &&
+                      isValidLeaderboard(incoming());
+
+      allow delete: if false;
+    }
+
+    match /test/{testId} {
+      allow read: if true;
+    }
+  }
+}
