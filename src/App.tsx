@@ -398,7 +398,7 @@ export default function App() {
   };
 
   const handleResetData = () => {
-    if (window.confirm('Mereset saldo kembali ke 1.000 koin dan mengulang simulasi?')) {
+    if (window.confirm('Mereset saldo kembali ke 5.000 koin dan mengulang simulasi?')) {
       const reset = getDefaultCasinoData();
       saveCasinoData(reset);
       setCasinoData(reset);
@@ -636,7 +636,7 @@ export default function App() {
             onClick={handleResetData}
             className="underline font-bold text-amber-300 hover:text-white ml-2 cursor-pointer"
           >
-            Ulang Simulasi (1.000 Koin)
+            Ulang Simulasi (5.000 Koin)
           </button>
         </div>
       )}
