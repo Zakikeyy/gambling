@@ -60,7 +60,6 @@ import KenoGame from './components/KenoGame';
 import LeaderboardModal from './components/LeaderboardModal';
 import ResearchArchivePage from './components/ResearchArchivePage';
 import GameScientificHeader from './components/GameScientificHeader';
-import ScientificFeedbackModal, { ScientificFeedbackEvent } from './components/ScientificFeedbackModal';
 import TokenAuthModal from './components/TokenAuthModal';
 import AntiGamblingWelcomeModal from './components/AntiGamblingWelcomeModal';
 import {
@@ -326,46 +325,22 @@ export default function App() {
       ? (outcome.netProfit ?? (outcome.payout ? outcome.payout - outcome.betAmount : outcome.betAmount))
       : (outcome.netProfit ? Math.abs(outcome.netProfit) : outcome.betAmount);
 
-    if (isWin || isLoss) {
-      const list = isWin ? SCIENTIFIC_WIN_EXPLANATIONS : SCIENTIFIC_LOSS_EXPLANATIONS;
-      const picked = list[Math.abs(netAmount) % list.length];
-
-      setLastResultFeedback({
-        type: isWin ? 'win' : 'loss',
-        amount: isWin ? netAmount : -netAmount,
-        title: picked.title,
-        quote: picked.quote,
-        source: picked.source,
-        explanation: picked.explanation,
+    if (isLoss) {
+      setCasinoData((prev) => {
+        const updatedStats = {
+          ...prev.stats,
+          totalLosses: prev.stats.totalLosses + netAmount,
+        };
+        const updated = saveCasinoData({ stats: updatedStats });
+        syncPlayerScore(
+          prev.nickname,
+          prev.balance,
+          updatedStats.totalWins,
+          updatedStats.totalLosses,
+          updatedStats.gameWins
+        );
+        return updated;
       });
-
-      // Show scientific modal popup after 1.4s delay so player sees result first
-      setTimeout(() => {
-        setScientificFeedbackModalEvent({
-          type: isWin ? 'win' : 'loss',
-          amount: isWin ? netAmount : -netAmount,
-          gameTitle: selectedGameId ? ALL_GAMES.find((g) => g.id === selectedGameId)?.title : undefined,
-        });
-      }, 1400);
-
-      // Record losses in stats
-      if (isLoss) {
-        setCasinoData((prev) => {
-          const updatedStats = {
-            ...prev.stats,
-            totalLosses: prev.stats.totalLosses + netAmount,
-          };
-          const updated = saveCasinoData({ stats: updatedStats });
-          syncPlayerScore(
-            prev.nickname,
-            prev.balance,
-            updatedStats.totalWins,
-            updatedStats.totalLosses,
-            updatedStats.gameWins
-          );
-          return updated;
-        });
-      }
     }
   };
 
@@ -1350,16 +1325,6 @@ export default function App() {
           />
         )}
       </AnimatePresence>
-
-      {/* Scientific Win / Loss Awareness Modal based on 7 Journals */}
-      <ScientificFeedbackModal
-        event={scientificFeedbackModalEvent}
-        onClose={() => setScientificFeedbackModalEvent(null)}
-        onOpenResearchPage={() => {
-          setScientificFeedbackModalEvent(null);
-          setShowResearchPage(true);
-        }}
-      />
 
       {/* Token Auth Modal */}
       <TokenAuthModal
