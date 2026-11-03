@@ -183,6 +183,8 @@ export default function App() {
   const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
   const [showMissionModal, setShowMissionModal] = useState<boolean>(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState<boolean>(false);
+  const [lossStreak, setLossStreak] = useState<number>(0);
+  const [isDrainingBalance, setIsDrainingBalance] = useState<boolean>(false);
   const [claimToast, setClaimToast] = useState<string | null>(null);
   const [gameResultToast, setGameResultToast] = useState<{
     type: 'win' | 'loss';
@@ -328,6 +330,19 @@ export default function App() {
     const netAmount = isWin
       ? (outcome.netProfit ?? (outcome.payout ? outcome.payout - outcome.betAmount : outcome.betAmount))
       : (outcome.netProfit ? Math.abs(outcome.netProfit) : outcome.betAmount);
+
+    if (isWin) {
+      setLossStreak(0);
+      setIsDrainingBalance(false);
+    } else if (isLoss) {
+      const newStreak = lossStreak + 1;
+      setLossStreak(newStreak);
+      if (newStreak >= 2) {
+        setIsDrainingBalance(true);
+        sounds.playLoss();
+        setTimeout(() => setIsDrainingBalance(false), 2500);
+      }
+    }
 
     if (isWin || isLoss) {
       setGameResultToast({
@@ -555,15 +570,25 @@ export default function App() {
             </div>
 
             {/* Chip Balance Display */}
-            <div className="flex items-center gap-2 bg-[#1a1710] border border-amber-500/30 px-3.5 py-1.5 rounded-xl shadow-inner">
-              <Coins size={16} className="text-amber-400" />
+            <motion.div
+              animate={isDrainingBalance ? { scale: [1, 1.08, 0.95, 1.05, 1], x: [0, -4, 4, -4, 0] } : {}}
+              transition={{ duration: 0.4 }}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl shadow-inner border transition-colors ${
+                isDrainingBalance
+                  ? 'bg-rose-950/90 border-rose-500 animate-pulse shadow-rose-950/80 shadow-lg'
+                  : 'bg-[#1a1710] border-amber-500/30'
+              }`}
+            >
+              <Coins size={16} className={isDrainingBalance ? 'text-rose-400 animate-bounce' : 'text-amber-400'} />
               <div className="flex flex-col leading-none">
-                <span className="text-[9px] uppercase tracking-wider text-amber-400/80 font-bold">SALDO KOIN</span>
-                <span className="text-sm font-black text-amber-300 font-mono">
+                <span className={`text-[9px] uppercase tracking-wider font-bold ${isDrainingBalance ? 'text-rose-400' : 'text-amber-400/80'}`}>
+                  {isDrainingBalance ? 'SALDO TERKURAS! 💸' : 'SALDO KOIN'}
+                </span>
+                <span className={`text-sm font-black font-mono ${isDrainingBalance ? 'text-rose-300' : 'text-amber-300'}`}>
                   {casinoData.balance.toLocaleString()}
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Daily Login Claim Button (Only show if claimable) */}
             {canClaimDaily && (
