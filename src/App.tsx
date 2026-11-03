@@ -1164,6 +1164,10 @@ export default function App() {
                   <span className="font-mono text-emerald-400 font-bold">+{casinoData.stats.totalWins.toLocaleString()} Koin</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-[#262626]">
+                  <span className="text-neutral-400">Total Kerugian (Total Loss):</span>
+                  <span className="font-mono text-rose-400 font-bold">-{casinoData.stats.totalLosses.toLocaleString()} Koin</span>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-[#262626]">
                   <span className="text-neutral-400">Kemenangan Terbesar (1x):</span>
                   <span className="font-mono text-amber-400 font-bold">+{casinoData.stats.biggestWin.toLocaleString()} Koin</span>
                 </div>
