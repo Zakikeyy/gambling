@@ -41,6 +41,8 @@ import {
   checkIsClaimableToday,
   CasinoSaveData,
   getDefaultCasinoData,
+  loadAccountsRegistry,
+  saveAccountsRegistry,
 } from './utils/storage';
 
 import MinesGame from './components/MinesGame';
@@ -183,6 +185,34 @@ export default function App() {
   const [showMissionModal, setShowMissionModal] = useState<boolean>(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState<boolean>(false);
   const [claimToast, setClaimToast] = useState<string | null>(null);
+
+  // Admin Top-up Other Token State
+  const [adminTargetToken, setAdminTargetToken] = useState<string>('');
+
+  const handleAdminTopupOtherToken = (token: string, amount: number) => {
+    if (!token.trim()) {
+      alert('Masukkan atau pilih token akun tujuan terlebih dahulu!');
+      return;
+    }
+    const registry = loadAccountsRegistry();
+    if (!registry[token]) {
+      alert(`Token akun "${token}" tidak ditemukan di registry!`);
+      return;
+    }
+    registry[token].balance += amount;
+    saveAccountsRegistry(registry);
+
+    // If target token is current active player, update current state too
+    if (token === casinoData.token) {
+      const updated = saveCasinoData({ balance: registry[token].balance });
+      setCasinoData(updated);
+    }
+
+    sounds.playJackpot();
+    confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+    alert(`Berhasil menambahkan +${amount.toLocaleString()} koin ke akun token ${token} (${registry[token].nickname})!`);
+    setAdminTargetToken('');
+  };
 
   // Dedicated Academic Research Page State
   const [showResearchPage, setShowResearchPage] = useState<boolean>(false);
@@ -1107,51 +1137,112 @@ export default function App() {
                 </div>
               )}
 
-              {/* GM / Admin Panel for R&D Coin Generation */}
+              {/* GM / Admin Panel for R&D & Other Player Token Top-Up */}
               {casinoData.isAdmin && (
-                <div className="bg-gradient-to-r from-rose-950/60 via-purple-950/60 to-black border border-rose-500/50 rounded-xl p-4 mb-4 text-xs space-y-2.5 shadow-lg">
+                <div className="bg-gradient-to-r from-rose-950/70 via-purple-950/70 to-black border border-rose-500/50 rounded-xl p-4 mb-4 text-xs space-y-3 shadow-lg">
                   <div className="flex items-center justify-between text-rose-300 font-bold">
                     <span className="flex items-center gap-1.5">
-                      🛡️ PANEL GM / ADMIN (R&D MODE)
+                      🛡️ PANEL GM / ADMIN (TOP UP TOKEN LAIN)
                     </span>
                     <span className="text-[10px] bg-rose-500 text-black px-2 py-0.5 rounded-full font-black">
-                      UNLIMITED
+                      SUPERUSER
                     </span>
                   </div>
                   <p className="text-neutral-300">
-                    Anda menggunakan Seed Key GM/Admin (<code className="text-amber-300 font-mono">ZK-W69L-D8XN-SRBK-B5SX</code>). Tambah koin sebebasnya untuk keperluan R&D:
+                    Anda menggunakan Seed Key GM/Admin (<code className="text-amber-300 font-mono">ZK-W69L-D8XN-SRBK-B5SX</code>). Anda dapat menambahkan koin untuk akun Anda sendiri atau akun pemain lain:
                   </p>
-                  <div className="grid grid-cols-3 gap-2 pt-1">
-                    <button
-                      onClick={() => {
-                        handleUpdateBalance(10000);
-                        sounds.playJackpot();
-                        alert('Berhasil menambahkan +10,000 Koin (GM Mode)!');
-                      }}
-                      className="py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs cursor-pointer shadow transition-all"
-                    >
-                      +10K Koin
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleUpdateBalance(50000);
-                        sounds.playJackpot();
-                        alert('Berhasil menambahkan +50,000 Koin (GM Mode)!');
-                      }}
-                      className="py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs cursor-pointer shadow transition-all"
-                    >
-                      +50K Koin
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleUpdateBalance(100000);
-                        sounds.playJackpot();
-                        alert('Berhasil menambahkan +100,000 Koin (GM Mode)!');
-                      }}
-                      className="py-2 bg-amber-600 hover:bg-amber-500 text-black font-extrabold rounded-xl text-xs cursor-pointer shadow transition-all"
-                    >
-                      +100K Koin
-                    </button>
+
+                  {/* Top up own account */}
+                  <div className="space-y-1.5">
+                    <span className="text-amber-300 font-bold block">1. Top Up Akun Anda Sendiri:</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => {
+                          handleUpdateBalance(10000);
+                          sounds.playJackpot();
+                          alert('Berhasil menambahkan +10,000 Koin ke akun Anda!');
+                        }}
+                        className="py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs cursor-pointer shadow"
+                      >
+                        +10K Koin
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleUpdateBalance(50000);
+                          sounds.playJackpot();
+                          alert('Berhasil menambahkan +50,000 Koin ke akun Anda!');
+                        }}
+                        className="py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs cursor-pointer shadow"
+                      >
+                        +50K Koin
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleUpdateBalance(100000);
+                          sounds.playJackpot();
+                          alert('Berhasil menambahkan +100,000 Koin ke akun Anda!');
+                        }}
+                        className="py-1.5 bg-amber-600 hover:bg-amber-500 text-black font-extrabold rounded-xl text-xs cursor-pointer shadow"
+                      >
+                        +100K Koin
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Top up other player token */}
+                  <div className="space-y-2 pt-2 border-t border-rose-500/30">
+                    <span className="text-amber-300 font-bold block">2. Top Up Token Pemain Lain:</span>
+                    <div className="space-y-1.5">
+                      <input
+                        type="text"
+                        placeholder="Masukkan Token / Seed Key Pemain (Cth: ZK-...)"
+                        value={adminTargetToken}
+                        onChange={(e) => setAdminTargetToken(e.target.value)}
+                        className="w-full bg-black px-3 py-2 rounded-xl text-xs font-mono text-white border border-rose-500/40 outline-none focus:border-amber-400"
+                      />
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => handleAdminTopupOtherToken(adminTargetToken, 10000)}
+                          className="py-1.5 bg-[#222] hover:bg-[#2c2c2c] border border-amber-500/40 text-amber-300 font-bold rounded-xl text-xs cursor-pointer"
+                        >
+                          +10K ke Token
+                        </button>
+                        <button
+                          onClick={() => handleAdminTopupOtherToken(adminTargetToken, 50000)}
+                          className="py-1.5 bg-[#222] hover:bg-[#2c2c2c] border border-amber-500/40 text-amber-300 font-bold rounded-xl text-xs cursor-pointer"
+                        >
+                          +50K ke Token
+                        </button>
+                        <button
+                          onClick={() => handleAdminTopupOtherToken(adminTargetToken, 100000)}
+                          className="py-1.5 bg-[#222] hover:bg-[#2c2c2c] border border-amber-500/40 text-amber-300 font-bold rounded-xl text-xs cursor-pointer"
+                        >
+                          +100K ke Token
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* List registered local accounts */}
+                    <div className="mt-2 pt-2 border-t border-neutral-800 max-h-36 overflow-y-auto space-y-1.5">
+                      <span className="text-[11px] text-neutral-400 font-bold block">Akun Terdaftar di Perangkat Ini:</span>
+                      {Object.entries(loadAccountsRegistry()).map(([tok, acc]) => (
+                        <div key={tok} className="flex items-center justify-between bg-black/60 p-2 rounded-xl border border-neutral-800 text-[11px]">
+                          <div>
+                            <strong className="text-white">{acc.nickname}</strong>
+                            <div className="font-mono text-[10px] text-neutral-400 truncate max-w-[140px]">{tok}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-amber-300 font-bold">{acc.balance.toLocaleString()} 🪙</span>
+                            <button
+                              onClick={() => handleAdminTopupOtherToken(tok, 50000)}
+                              className="px-2 py-1 bg-amber-500 hover:bg-amber-400 text-black font-black rounded text-[10px] cursor-pointer"
+                            >
+                              +50K
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
