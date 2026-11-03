@@ -184,6 +184,11 @@ export default function App() {
   const [showMissionModal, setShowMissionModal] = useState<boolean>(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState<boolean>(false);
   const [claimToast, setClaimToast] = useState<string | null>(null);
+  const [gameResultToast, setGameResultToast] = useState<{
+    type: 'win' | 'loss';
+    amount: number;
+    newBalance: number;
+  } | null>(null);
 
   // Admin Top-up Other Token State
   const [adminTargetToken, setAdminTargetToken] = useState<string>('');
@@ -317,13 +322,21 @@ export default function App() {
     });
   };
 
-  // Called strictly when a game round concludes and outcome is finalized
   const handleGameEnd = (outcome: GameOutcome) => {
     const isWin = outcome.type === 'win';
     const isLoss = outcome.type === 'loss';
     const netAmount = isWin
       ? (outcome.netProfit ?? (outcome.payout ? outcome.payout - outcome.betAmount : outcome.betAmount))
       : (outcome.netProfit ? Math.abs(outcome.netProfit) : outcome.betAmount);
+
+    if (isWin || isLoss) {
+      setGameResultToast({
+        type: isWin ? 'win' : 'loss',
+        amount: netAmount,
+        newBalance: casinoData.balance,
+      });
+      setTimeout(() => setGameResultToast(null), 4000);
+    }
 
     if (isLoss) {
       setCasinoData((prev) => {
@@ -1343,6 +1356,37 @@ export default function App() {
         isOpen={welcomeModalOpen}
         onClose={() => setWelcomeModalOpen(false)}
       />
+
+      {/* Game Result Toast Notification */}
+      <AnimatePresence>
+        {gameResultToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 25, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 25, scale: 0.95 }}
+            className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-2xl border text-xs sm:text-sm font-bold flex items-center gap-3 ${
+              gameResultToast.type === 'win'
+                ? 'bg-gradient-to-r from-emerald-950 via-green-900 to-black border-emerald-500/60 text-emerald-200'
+                : 'bg-gradient-to-r from-rose-950 via-red-900 to-black border-rose-500/60 text-rose-200'
+            }`}
+          >
+            <span className="text-xl">
+              {gameResultToast.type === 'win' ? '🎉' : '💸'}
+            </span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span>{gameResultToast.type === 'win' ? 'MENANG!' : 'KALAH!'}</span>
+                <span className={`font-mono font-black ${gameResultToast.type === 'win' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {gameResultToast.type === 'win' ? `+${gameResultToast.amount.toLocaleString()}` : `-${gameResultToast.amount.toLocaleString()}`} Koin
+                </span>
+              </div>
+              <span className="text-[11px] text-neutral-300 font-mono">
+                Saldo Sekarang: <strong className="text-amber-300">{casinoData.balance.toLocaleString()} Koin</strong>
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Educational Footer */}
       <footer className="w-full py-5 text-center text-xs text-[#888888] border-t border-[#1e1e1e] bg-[#0c0c0c] mt-auto">
