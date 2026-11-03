@@ -339,12 +339,14 @@ export default function App() {
         explanation: picked.explanation,
       });
 
-      // Show scientific modal popup on completion of round
-      setScientificFeedbackModalEvent({
-        type: isWin ? 'win' : 'loss',
-        amount: isWin ? netAmount : -netAmount,
-        gameTitle: selectedGameId ? ALL_GAMES.find((g) => g.id === selectedGameId)?.title : undefined,
-      });
+      // Show scientific modal popup after 1.4s delay so player sees result first
+      setTimeout(() => {
+        setScientificFeedbackModalEvent({
+          type: isWin ? 'win' : 'loss',
+          amount: isWin ? netAmount : -netAmount,
+          gameTitle: selectedGameId ? ALL_GAMES.find((g) => g.id === selectedGameId)?.title : undefined,
+        });
+      }, 1400);
 
       // Record losses in stats
       if (isLoss) {
