@@ -9,8 +9,13 @@ import firebaseConfig from '../firebase-applet-config.json';
 
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// CRITICAL: Must pass firestoreDatabaseId per Firebase skill instructions
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// CRITICAL: Handle firestoreDatabaseId correctly
+export const db = getFirestore(
+  app,
+  !firebaseConfig.firestoreDatabaseId || firebaseConfig.firestoreDatabaseId === '(default)'
+    ? undefined
+    : firebaseConfig.firestoreDatabaseId
+);
 export const auth = getAuth(app);
 
 /**
