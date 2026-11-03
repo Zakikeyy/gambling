@@ -1107,6 +1107,55 @@ export default function App() {
                 </div>
               )}
 
+              {/* GM / Admin Panel for R&D Coin Generation */}
+              {casinoData.isAdmin && (
+                <div className="bg-gradient-to-r from-rose-950/60 via-purple-950/60 to-black border border-rose-500/50 rounded-xl p-4 mb-4 text-xs space-y-2.5 shadow-lg">
+                  <div className="flex items-center justify-between text-rose-300 font-bold">
+                    <span className="flex items-center gap-1.5">
+                      🛡️ PANEL GM / ADMIN (R&D MODE)
+                    </span>
+                    <span className="text-[10px] bg-rose-500 text-black px-2 py-0.5 rounded-full font-black">
+                      UNLIMITED
+                    </span>
+                  </div>
+                  <p className="text-neutral-300">
+                    Anda menggunakan Seed Key GM/Admin (<code className="text-amber-300 font-mono">ZK-W69L-D8XN-SRBK-B5SX</code>). Tambah koin sebebasnya untuk keperluan R&D:
+                  </p>
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        handleUpdateBalance(10000);
+                        sounds.playJackpot();
+                        alert('Berhasil menambahkan +10,000 Koin (GM Mode)!');
+                      }}
+                      className="py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs cursor-pointer shadow transition-all"
+                    >
+                      +10K Koin
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleUpdateBalance(50000);
+                        sounds.playJackpot();
+                        alert('Berhasil menambahkan +50,000 Koin (GM Mode)!');
+                      }}
+                      className="py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs cursor-pointer shadow transition-all"
+                    >
+                      +50K Koin
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleUpdateBalance(100000);
+                        sounds.playJackpot();
+                        alert('Berhasil menambahkan +100,000 Koin (GM Mode)!');
+                      }}
+                      className="py-2 bg-amber-600 hover:bg-amber-500 text-black font-extrabold rounded-xl text-xs cursor-pointer shadow transition-all"
+                    >
+                      +100K Koin
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Economy Rules Info Box */}
               <div className="bg-[#141414] border border-[#2a2a2a] rounded-xl p-3.5 mb-4 text-xs space-y-2 text-neutral-300">
                 <div className="font-bold text-amber-300 flex items-center gap-1.5 text-sm">
